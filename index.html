@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星辰导航 - 你的上网起点</title>
+<style>
+/* ========== CSS变量 ========== */
+:root {
+  --bg-dark: #0a0e27;
+  --bg-darker: #060918;
+  --card-bg: rgba(255,255,255,0.06);
+  --card-border: rgba(255,255,255,0.1);
+  --card-hover: rgba(255,255,255,0.12);
+  --text-primary: #e8eaf6;
+  --text-secondary: #a0a4c0;
+  --accent-1: #7c4dff;
+  --accent-2: #00bcd4;
+  --accent-3: #ff6f00;
+  --accent-4: #e91e63;
+  --shadow: 0 8px 32px rgba(0,0,0,0.3);
+  --radius: 16px;
+}
+
+/* ========== 全局重置 ========== */
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-darker);
+  color: var(--text-primary);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ========== 星空背景 ========== */
+body::before {
+  content:'';
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background: radial-gradient(ellipse at 20% 50%, rgba(124,77,255,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(0,188,212,0.1) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(233,30,99,0.08) 0%, transparent 50%);
+  z-index:-2;
+}
+body::after {
+  content:'';
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1.5px 1.5px at 15% 90%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 55% 35%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1.5px 1.5px at 65% 15%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.8), transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+  z-index:-1;
+}
+@keyframes twinkle { 0%{opacity:.6} 100%{opacity:1} }
+
+/* ========== 顶部区域 ========== */
+.header {
+  text-align:center;
+  padding: 50px 20px 30px;
+}
+.header h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  background: linear-gradient(135deg, #7c4dff, #00bcd4, #e91e63, #ff6f00);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease infinite;
+  margin-bottom: 10px;
+}
+@keyframes gradientShift {
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+.header p { color: var(--text-secondary); font-size: 1.1rem; }
+.header .datetime {
+  margin-top: 12px; font-size: 0.95rem; color: var(--text-secondary);
+  display:flex; justify-content:center; gap:20px; flex-wrap:wrap;
+}
+
+/* ========== 搜索区域 ========== */
+.search-container {
+  max-width:680px; margin: 20px auto 10px; padding: 0 20px;
+}
+.search-box {
+  display:flex; gap:8px; background: var(--card-bg);
+  backdrop-filter:blur(12px); border:1px solid var(--card-border);
+  border-radius:50px; padding:6px; transition:all .3s;
+}
+.search-box:focus-within {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(124,77,255,0.2);
+}
+.search-box input {
+  flex:1; background:transparent; border:none; outline:none;
+  color:var(--text-primary); font-size:1rem; padding:12px 20px;
+}
+.search-box input::placeholder { color: var(--text-secondary); }
+.search-box select {
+  background:rgba(124,77,255,0.2); border:none; border-radius:30px;
+  color:var(--text-primary); padding:0 14px; font-size:.9rem; outline:none;
+  cursor:pointer;
+}
+.search-box button {
+  background:linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border:none; border-radius:30px; color:#fff; padding:0 24px;
+  font-size:1rem; cursor:pointer; transition:transform .2s;
+}
+.search-box button:hover { transform:scale(1.05); }
+
+/* ========== 快捷操作 ========== */
+.quick-actions {
+  display:flex; justify-content:center; gap:12px; flex-wrap:wrap;
+  padding: 10px 20px 20px;
+}
+.quick-actions button {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  color:var(--text-secondary); padding:8px 18px; border-radius:30px;
+  cursor:pointer; font-size:.9rem; transition:all .3s;
+  backdrop-filter:blur(8px);
+}
+.quick-actions button:hover {
+  background:var(--card-hover); color:var(--text-primary);
+  border-color: var(--accent-1);
+}
+
+/* ========== 分类导航条 ========== */
+.category-nav {
+  max-width:1200px; margin:10px auto; padding:0 20px;
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+}
+.category-nav a {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  color:var(--text-secondary); padding:6px 16px; border-radius:20px;
+  text-decoration:none; font-size:.85rem; transition:all .3s;
+}
+.category-nav a:hover {
+  background:rgba(124,77,255,0.2); color:#fff;
+  border-color:var(--accent-1);
+}
+
+/* ========== 主内容区 ========== */
+.main-content {
+  max-width:1200px; margin:0 auto; padding:20px;
+}
+
+/* ========== 分类区块 ========== */
+.category-section { margin-bottom:36px; }
+.category-header {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:16px; cursor:pointer; user-select:none;
+}
+.category-header h2 {
+  font-size:1.4rem; display:flex; align-items:center; gap:8px;
+}
+.category-header .toggle-icon {
+  font-size:1rem; color:var(--text-secondary);
+  transition:transform .3s; margin-left:auto;
+}
+.category-section.collapsed .toggle-icon { transform:rotate(-90deg); }
+.category-section.collapsed .nav-grid { display:none; }
+
+/* ========== 导航卡片网格 ========== */
+.nav-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap:12px;
+}
+.nav-card {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:var(--radius); padding:16px 14px;
+  text-decoration:none; color:var(--text-primary);
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+  backdrop-filter:blur(10px); position:relative; overflow:hidden;
+}
+.nav-card::before {
+  content:''; position:absolute; top:0; left:0; width:100%; height:3px;
+  background:linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  opacity:0; transition:opacity .3s;
+}
+.nav-card:hover {
+  transform:translateY(-4px);
+  background:var(--card-hover);
+  border-color:rgba(124,77,255,0.4);
+  box-shadow:0 12px 40px rgba(124,77,255,0.2);
+}
+.nav-card:hover::before { opacity:1; }
+.nav-card .card-icon {
+  font-size:1.8rem; margin-bottom:8px; display:block;
+}
+.nav-card .card-title {
+  font-size:1rem; font-weight:600; margin-bottom:4px;
+}
+.nav-card .card-desc {
+  font-size:.78rem; color:var(--text-secondary); line-height:1.4;
+}
+
+/* ========== 返回顶部 ========== */
+.back-to-top {
+  position:fixed; bottom:30px; right:30px;
+  width:48px; height:48px; border-radius:50%;
+  background:linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border:none; color:#fff; font-size:1.3rem; cursor:pointer;
+  box-shadow:var(--shadow); opacity:0; visibility:hidden;
+  transition:all .3s; z-index:100;
+}
+.back-to-top.show { opacity:1; visibility:visible; }
+.back-to-top:hover { transform:scale(1.1); }
+
+/* ========== 页脚 ========== */
+.footer {
+  text-align:center; padding:30px 20px 40px;
+  color:var(--text-secondary); font-size:.85rem;
+  border-top:1px solid var(--card-border); margin-top:40px;
+}
+
+/* ========== 提示弹窗 ========== */
+.toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:rgba(124,77,255,0.9); color:#fff; padding:10px 24px;
+  border-radius:30px; font-size:.9rem; opacity:0; visibility:hidden;
+  transition:all .3s; z-index:200; backdrop-filter:blur(8px);
+}
+.toast.show { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); }
+
+/* ========== 响应式 ========== */
+@media (max-width:768px) {
+  .nav-grid { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:10px; }
+  .search-box { flex-wrap:wrap; border-radius:20px; }
+  .search-box input { min-width:100%; order:1; }
+  .search-box select { order:2; }
+  .search-box button { order:3; flex:1; padding:10px; }
+  .header .datetime { font-size:.85rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== 顶部 ========== -->
+<div class="header">
+  <h1>✦ 星辰导航</h1>
+  <p>你的私人上网起点，一网打尽所有常用站点</p>
+  <div class="datetime">
+    <span id="clock"></span>
+    <span id="date"></span>
+  </div>
+</div>
+
+<!-- ========== 搜索 ========== -->
+<div class="search-container">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 搜索百度/Google/GitHub..." autocomplete="off">
+    <select id="searchEngine">
+      <option value="baidu">百度</option>
+      <option value="google">Google</option>
+      <option value="bing">Bing</option>
+      <option value="duckduckgo">DuckDuckGo</option>
+      <option value="github">GitHub</option>
+      <option value="zhihu">知乎</option>
+    </select>
+    <button onclick="doSearch()">搜索</button>
+  </div>
+</div>
+
+<!-- ========== 快捷操作 ========== -->
+<div class="quick-actions">
+  <button onclick="addBookmark()">⭐ 收藏此页</button>
+  <button onclick="setHomepage()">🏠 设为主页</button>
+  <button onclick="clearData()">🗑️ 清除数据</button>
+  <button onclick="showToast('💡 提示：按 / 键快速聚焦搜索框')">💡 快捷键</button>
+</div>
+
+<!-- ========== 分类导航条 ========== -->
+<div class="category-nav" id="categoryNav"></div>
+
+<!-- ========== 主内容 ========== -->
+<div class="main-content" id="mainContent"></div>
+
+<!-- ========== 返回顶部 ========== -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ========== 提示弹窗 ========== -->
+<div class="toast" id="toast"></div>
+
+<!-- ========== 页脚 ========== -->
+<div class="footer">
+  <p>© 2026 星辰导航 · 本地纯静态页面 · 无广告 · 无追踪 · 数据完全保存在你的浏览器中</p>
+  <p style="margin-top:6px;font-size:.8rem;color:#666;">按 <kbd style="background:#333;padding:2px 8px;border-radius:4px;">/</kbd> 聚焦搜索 · 按 <kbd style="background:#333;padding:2px 8px;border-radius:4px;">Esc</kbd> 取消聚焦</p>
+</div>
+
+<script>
+/* ========== 站点数据 ========== */
+const categories = [
+  {
+    name: "🔎 常用搜索", icon: "🔎",
+    sites: [
+      { name:"百度", url:"https://www.baidu.com", desc:"中文最大搜索引擎" },
+      { name:"Google", url:"https://www.google.com", desc:"全球最大搜索引擎" },
+      { name:"Bing", url:"https://www.bing.com", desc:"微软搜索引擎" },
+      { name:"DuckDuckGo", url:"https://duckduckgo.com", desc:"隐私保护搜索" },
+      { name:"搜狗搜索", url:"https://www.sogou.com", desc:"腾讯旗下搜索" },
+      { name:"360搜索", url:"https://www.so.com", desc:"360安全搜索" },
+      { name:"Yandex", url:"https://yandex.com", desc:"俄罗斯搜索引擎" },
+      { name:"Brave Search", url:"https://search.brave.com", desc:"独立索引新引擎" },
+    ]
+  },
+  {
+    name: "💬 社交媒体", icon: "💬",
+    sites: [
+      { name:"微博", url:"https://weibo.com", desc:"中文社交媒体平台" },
+      { name:"知乎", url:"https://www.zhihu.com", desc:"高质量问答社区" },
+      { name:"豆瓣", url:"https://www.douban.com", desc:"读书电影音乐" },
+      { name:"小红书", url:"https://www.xiaohongshu.com", desc:"生活方式分享" },
+      { name:"今日头条", url:"https://www.toutiao.com", desc:"个性化资讯推荐" },
+      { name:"B站", url:"https://www.bilibili.com", desc:"弹幕视频网站" },
+      { name:"抖音", url:"https://www.douyin.com", desc:"短视频平台" },
+      { name:"快手", url:"https://www.kuaishou.com", desc:"短视频生活记录" },
+      { name:"Twitter/X", url:"https://twitter.com", desc:"全球社交平台" },
+      { name:"Facebook", url:"https://www.facebook.com", desc:"全球社交网络" },
+      { name:"Instagram", url:"https://www.instagram.com", desc:"图片社交平台" },
+      { name:"Telegram", url:"https://telegram.org", desc:"加密即时通讯" },
+    ]
+  },
+  {
+    name: "📧 邮箱办公", icon: "📧",
+    sites: [
+      { name:"QQ邮箱", url:"https://mail.qq.com", desc:"腾讯电子邮箱" },
+      { name:"网易邮箱", url:"https://mail.163.com", desc:"网易电子邮箱" },
+      { name:"Gmail", url:"https://mail.google.com", desc:"Google邮箱" },
+      { name:"Outlook", url:"https://outlook.com", desc:"微软邮箱服务" },
+      { name:"Foxmail", url:"https://www.foxmail.com", desc:"腾讯Foxmail邮箱" },
+      { name:"腾讯文档", url:"https://docs.qq.com", desc:"在线协作文档" },
+      { name:"飞书", url:"https://www.feishu.cn", desc:"字节跳动协作平台" },
+      { name:"钉钉", url:"https://www.dingtalk.com", desc:"阿里办公协作" },
+      { name:"企业微信", url:"https://work.weixin.qq.com", desc:"腾讯企业通讯" },
+      { name:"Notion", url:"https://www.notion.so", desc:"全功能笔记协作" },
+      { name:"语雀", url:"https://www.yuque.com", desc:"蚂蚁知识管理" },
+      { name:"WPS", url:"https://www.wps.cn", desc:"金山办公套件" },
+    ]
+  },
+  {
+    name: "💻 开发技术", icon: "💻",
+    sites: [
+      { name:"GitHub", url:"https://github.com", desc:"全球最大代码托管" },
+      { name:"Gitee", url:"https://gitee.com", desc:"国内代码托管平台" },
+      { name:"GitLab", url:"https://gitlab.com", desc:"DevOps代码平台" },
+      { name:"Stack Overflow", url:"https://stackoverflow.com", desc:"程序员问答社区" },
+      { name:"CSDN", url:"https://www.csdn.net", desc:"中文IT技术社区" },
+      { name:"掘金", url:"https://juejin.cn", desc:"高质量开发者社区" },
+      { name:"菜鸟教程", url:"https://www.runoob.com", desc:"编程入门教程" },
+      { name:"MDN", url:"https://developer.mozilla.org", desc:"Web技术文档" },
+      { name:"W3School", url:"https://www.w3school.com.cn", desc:"Web开发教程" },
+      { name:"LeetCode", url:"https://leetcode.cn", desc:"算法刷题平台" },
+      { name:"CodePen", url:"https://codepen.io", desc:"前端代码演示" },
+      { name:"JSFiddle", url:"https://jsfiddle.net", desc:"在线JS编辑器" },
+      { name:"Docker Hub", url:"https://hub.docker.com", desc:"容器镜像仓库" },
+      { name:"Kubernetes", url:"https://kubernetes.io", desc:"容器编排文档" },
+      { name:"NPM", url:"https://www.npmjs.com", desc:"Node包管理器" },
+      { name:"Python.org", url:"https://www.python.org", desc:"Python官方网站" },
+    ]
+  },
+  {
+    name: "🎨 设计创意", icon: "🎨",
+    sites: [
+      { name:"Iconfont", url:"https://www.iconfont.cn", desc:"阿里图标库" },
+      { name:"Dribbble", url:"https://dribbble.com", desc:"设计师作品展示" },
+      { name:"Behance", url:"https://www.behance.net", desc:"创意设计社区" },
+      { name:"优设", url:"https://www.uisdc.com", desc:"设计师学习平台" },
+      { name:"Canva", url:"https://www.canva.cn", desc:"在线设计工具" },
+      { name:"Figma", url:"https://www.figma.com", desc:"协作UI设计工具" },
+      { name:"站酷", url:"https://www.zcool.com.cn", desc:"中文设计社区" },
+      { name:"Adobe Express", url:"https://www.adobe.com/express", desc:"Adobe在线设计" },
+      { name:"Pinterest", url:"https://www.pinterest.com", desc:"灵感图片收集" },
+      { name:"UI中国", url:"https://www.ui.cn", desc:"UI设计师社区" },
+      { name:"花瓣网", url:"https://huaban.com", desc:"图片素材采集" },
+      { name:"Material Design", url:"https://material.io", desc:"Google设计语言" },
+    ]
+  },
+  {
+    name: "🎬 视频音乐", icon: "🎬",
+    sites: [
+      { name:"YouTube", url:"https://www.youtube.com", desc:"全球最大视频站" },
+      { name:"Netflix", url:"https://www.netflix.com", desc:"流媒体影视平台" },
+      { name:"爱奇艺", url:"https://www.iqiyi.com", desc:"在线视频平台" },
+      { name:"腾讯视频", url:"https://v.qq.com", desc:"腾讯视频平台" },
+      { name:"优酷", url:"https://www.youku.com", desc:"阿里视频平台" },
+      { name:"芒果TV", url:"https://www.mgtv.com", desc:"湖南卫视视频" },
+      { name:"网易云音乐", url:"https://music.163.com", desc:"音乐流媒体" },
+      { name:"QQ音乐", url:"https://y.qq.com", desc:"腾讯音乐平台" },
+      { name:"Spotify", url:"https://www.spotify.com", desc:"全球音乐流媒体" },
+      { name:"哔哩哔哩", url:"https://www.bilibili.com", desc:"弹幕视频社区" },
+      { name:"Twitch", url:"https://www.twitch.tv", desc:"游戏直播平台" },
+      { name:"Disney+", url:"https://www.disneyplus.com", desc:"迪士尼流媒体" },
+    ]
+  },
+  {
+    name: "🛒 购物电商", icon: "🛒",
+    sites: [
+      { name:"淘宝", url:"https://www.taobao.com", desc:"阿里购物平台" },
+      { name:"京东", url:"https://www.jd.com", desc:"正品电商自营" },
+      { name:"拼多多", url:"https://www.pinduoduo.com", desc:"社交拼团电商" },
+      { name:"天猫", url:"https://www.tmall.com", desc:"品牌正品商城" },
+      { name:"亚马逊", url:"https://www.amazon.com", desc:"全球电商巨头" },
+      { name:"苏宁易购", url:"https://www.suning.com", desc:"家电3C电商" },
+      { name:"唯品会", url:"https://www.vip.com", desc:"品牌特卖电商" },
+      { name:"得物", url:"https://www.dewu.com", desc:"潮流球鞋交易" },
+      { name:"eBay", url:"https://www.ebay.com", desc:"全球拍卖电商" },
+      { name:"Shopify", url:"https://www.shopify.com", desc:"电商建站平台" },
+      { name:"1688", url:"https://www.1688.com", desc:"批发采购平台" },
+      { name:"抖音电商", url:"https://www.douyinec.com", desc:"兴趣电商" },
+    ]
+  },
+  {
+    name: "📡 新闻资讯", icon: "📡",
+    sites: [
+      { name:"腾讯新闻", url:"https://news.qq.com", desc:"腾讯新闻门户" },
+      { name:"人民网", url:"http://www.people.com.cn", desc:"人民日报官网" },
+      { name:"新华网", url:"http://www.xinhuanet.com", desc:"新华社官网" },
+      { name:"虎嗅", url:"https://www.huxiu.com", desc:"商业科技资讯" },
+      { name:"36氪", url:"https://36kr.com", desc:"新经济媒体" },
+      { name:"IT之家", url:"https://www.ithome.com", desc:"IT科技资讯" },
+      { name:"澎湃新闻", url:"https://www.thepaper.cn", desc:"时政新闻门户" },
+      { name:"BBC", url:"https://www.bbc.com", desc:"英国广播公司" },
+      { name:"CNN", url:"https://www.cnn.com", desc:"美国有线电视新闻" },
+      { name:"Reuters", url:"https://www.reuters.com", desc:"路透社新闻" },
+      { name:"Hacker News", url:"https://news.ycombinator.com", desc:"硅谷科技新闻" },
+      { name:"少数派", url:"https://sspai.com", desc:"数字生活指南" },
+    ]
+  },
+  {
+    name: "🔧 工具与实用", icon: "🔧",
+    sites: [
+      { name:"Google翻译", url:"https://translate.google.com", desc:"多语言翻译工具" },
+      { name:"TinyJPG", url:"https://tinyjpg.com", desc:"图片压缩工具" },
+      { name:"在线PS", url:"https://www.photopea.com", desc:"浏览器PS替代" },
+      { name:"Remove.bg", url:"https://www.remove.bg", desc:"AI抠图工具" },
+      { name:"Base64工具", url:"https://www.base64encode.org", desc:"Base64编解码" },
+      { name:"JSON格式化", url:"https://json.cn", desc:"JSON在线解析" },
+      { name:"PDF24", url:"https://tools.pdf24.org", desc:"PDF在线工具集" },
+      { name:"格式转换", url:"https://convertio.co", desc:"万能格式转换" },
+      { name:"DNS查询", url:"https://dnschecker.org", desc:"全球DNS检测" },
+      { name:"网速测试", url:"https://www.speedtest.net", desc:"宽带网速测试" },
+      { name:"Cron生成", url:"https://crontab.guru", desc:"Cron表达式生成" },
+      { name:"Diff工具", url:"https://www.diffchecker.com", desc:"文本差异对比" },
+      { name:"二维码工具", url:"https://www.qr-code-generator.com", desc:"二维码生成/解析" },
+      { name:"IP查询", url:"https://ip138.com", desc:"IP地址查询" },
+      { name:"图床上传", url:"https://imgtu.com", desc:"免费图床服务" },
+      { name:"文字转语音", url:"https://ttsmaker.com", desc:"AI文字转语音" },
+      { name:"ProcessOn", url:"https://www.processon.com", desc:"在线流程图" },
+      { name:"日期计算", url:"https://www.timeanddate.com", desc:"日期时区计算" },
+      { name:"配色工具", url:"https://coolors.co", desc:"配色方案生成" },
+      { name:"AES加密", url:"https://www.aesencryption.net", desc:"AES加密解密" },
+      { name:"正则测试", url:"https://regex101.com", desc:"正则表达式测试" },
+      { name:"视频去水印", url:"https://www.apowersoft.com", desc:"视频水印去除" },
+      { name:"在线OCR", url:"https://www.onlineocr.net", desc:"图片文字识别" },
+      { name:"短链生成", url:"https://bitly.com", desc:"URL短链服务" },
+    ]
+  },
+  {
+    name: "☁️ 网盘云存储", icon: "☁️",
+    sites: [
+      { name:"阿里云盘", url:"https://www.aliyundrive.com", desc:"阿里云存储服务" },
+      { name:"百度网盘", url:"https://pan.baidu.com", desc:"百度云存储" },
+      { name:"腾讯微云", url:"https://www.weiyun.com", desc:"腾讯云存储" },
+      { name:"Dropbox", url:"https://www.dropbox.com", desc:"全球云存储" },
+      { name:"Google Drive", url:"https://drive.google.com", desc:"谷歌云盘" },
+      { name:"OneDrive", url:"https://onedrive.live.com", desc:"微软云存储" },
+      { name:"iCloud", url:"https://www.icloud.com", desc:"苹果云服务" },
+      { name:"天翼云盘", url:"https://cloud.189.cn", desc:"中国电信云盘" },
+      { name:"移动云盘", url:"https://yun.139.com", desc:"中国移动云盘" },
+      { name:"坚果云", url:"https://www.jianguoyun.com", desc:"同步网盘服务" },
+    ]
+  },
+  {
+    name: "🎓 学习教育", icon: "🎓",
+    sites: [
+      { name:"中国大学MOOC", url:"https://www.icourse163.org", desc:"免费大学课程" },
+      { name:"Coursera", url:"https://www.coursera.org", desc:"全球在线课程" },
+      { name:"Udemy", url:"https://www.udemy.com", desc:"技能学习平台" },
+      { name:"Wikipedia", url:"https://zh.wikipedia.org", desc:"自由百科全书" },
+      { name:"Duolingo", url:"https://www.duolingo.com", desc:"免费语言学习" },
+      { name:"Khan Academy", url:"https://www.khanacademy.org", desc:"可汗学院免费课" },
+      { name:"网易公开课", url:"https://open.163.com", desc:"名校公开课" },
+      { name:"学堂在线", url:"https://www.xuetangx.com", desc:"清华在线课程" },
+      { name:"知网", url:"https://www.cnki.net", desc:"学术文献检索" },
+      { name:"Google Scholar", url:"https://scholar.google.com", desc:"谷歌学术搜索" },
+      { name:"DeepL翻译", url:"https://www.deepl.com", desc:"AI精准翻译" },
+      { name:"Quizlet", url:"https://quizlet.com", desc:"在线学习卡片" },
+    ]
+  },
+  {
+    name: "💰 金融财经", icon: "💰",
+    sites: [
+      { name:"东方财富", url:"https://www.eastmoney.com", desc:"金融资讯门户" },
+      { name:"雪球", url:"https://xueqiu.com", desc:"投资者社区" },
+      { name:"同花顺", url:"https://www.10jqka.com.cn", desc:"股票行情软件" },
+      { name:"支付宝", url:"https://www.alipay.com", desc:"蚂蚁金融服务" },
+      { name:"微信支付", url:"https://pay.weixin.qq.com", desc:"腾讯支付服务" },
+      { name:"PayPal", url:"https://www.paypal.com", desc:"全球在线支付" },
+      { name:"工商银行", url:"https://www.icbc.com.cn", desc:"中国工商银行" },
+      { name:"招商银行", url:"https://www.cmbchina.com", desc:"招行网上银行" },
+      { name:"Bloomberg", url:"https://www.bloomberg.com", desc:"彭博财经资讯" },
+      { name:"Yahoo Finance", url:"https://finance.yahoo.com", desc:"雅虎财经数据" },
+      { name:"CoinMarketCap", url:"https://coinmarketcap.com", desc:"加密货币行情" },
+      { name:"Binance", url:"https://www.binance.com", desc:"全球最大交易所" },
+    ]
+  },
+  {
+    name: "🏥 健康医疗", icon: "🏥",
+    sites: [
+      { name:"丁香园", url:"https://www.dxy.cn", desc:"医学专业社区" },
+      { name:"丁香医生", url:"https://dxy.com", desc:"在线问诊平台" },
+      { name:"寻医问药", url:"https://www.xywy.com", desc:"医疗健康咨询" },
+      { name:"好大夫", url:"https://www.haodf.com", desc:"在线找医生" },
+      { name:"薄荷健康", url:"https://www.boohee.com", desc:"健康管理工具" },
+      { name:"WebMD", url:"https://www.webmd.com", desc:"美国医疗资讯" },
+      { name:"WHO", url:"https://www.who.int", desc:"世界卫生组织" },
+      { name:"NIH", url:"https://www.nih.gov", desc:"美国国立卫生研究院" },
+    ]
+  },
+  {
+    name: "✈️ 出行旅游", icon: "✈️",
+    sites: [
+      { name:"携程", url:"https://www.ctrip.com", desc:"在线旅行服务" },
+      { name:"飞猪", url:"https://www.fliggy.com", desc:"阿里旅行平台" },
+      { name:"去哪儿", url:"https://www.qunar.com", desc:"机票酒店比价" },
+      { name:"高德地图", url:"https://www.amap.com", desc:"导航地图服务" },
+      { name:"百度地图", url:"https://map.baidu.com", desc:"百度地图导航" },
+      { name:"Google Maps", url:"https://maps.google.com", desc:"谷歌地图服务" },
+      { name:"滴滴出行", url:"https://www.didiglobal.com", desc:"网约车平台" },
+      { name:"Airbnb", url:"https://www.airbnb.com", desc:"民宿短租平台" },
+      { name:"Booking", url:"https://www.booking.com", desc:"全球酒店预订" },
+      { name:"TripAdvisor", url:"https://www.tripadvisor.com", desc:"旅行点评社区" },
+      { name:"马蜂窝", url:"https://www.mafengwo.cn", desc:"旅游攻略社区" },
+      { name:"穷游网", url:"https://www.qyer.com", desc:"出境游社区" },
+    ]
+  },
+  {
+    name: "🍔 生活服务", icon: "🍔",
+    sites: [
+      { name:"美团", url:"https://www.meituan.com", desc:"本地生活服务" },
+      { name:"饿了么", url:"https://www.ele.me", desc:"在线外卖平台" },
+      { name:"大众点评", url:"https://www.dianping.com", desc:"消费评价指南" },
+      { name:"链家", url:"https://www.lianjia.com", desc:"房产交易服务" },
+      { name:"贝壳找房", url:"https://www.beike.com", desc:"居住服务平台" },
+      { name:"58同城", url:"https://www.58.com", desc:"本地信息分类" },
+      { name:"赶集网", url:"https://www.ganji.com", desc:"生活信息服务" },
+      { name:"12306", url:"https://www.12306.cn", desc:"火车票官方预订" },
+      { name:"顺丰速运", url:"https://www.sf-express.com", desc:"快递物流查询" },
+      { name:"菜鸟裹裹", url:"https://www.cainiao.com", desc:"阿里物流平台" },
+      { name:"闲鱼", url:"https://www.goofish.com", desc:"二手交易平台" },
+      { name:"转转", url:"https://www.zhuanzhuan.com", desc:"二手手机交易" },
+    ]
+  },
+  {
+    name: "📊 数据分析", icon: "📊",
+    sites: [
+      { name:"Google Analytics", url:"https://analytics.google.com", desc:"网站流量分析" },
+      { name:"百度统计", url:"https://tongji.baidu.com", desc:"百度流量分析" },
+      { name:"友盟+", url:"https://www.umeng.com", desc:"全域数据服务" },
+      { name:"Tableau", url:"https://www.tableau.com", desc:"数据可视化工具" },
+      { name:"Power BI", url:"https://powerbi.microsoft.com", desc:"微软商业智能" },
+      { name:"神策数据", url:"https://www.sensorsdata.cn", desc:"用户行为分析" },
+      { name:"GrowingIO", url:"https://www.growingio.com", desc:"增长分析平台" },
+      { name:"SimilarWeb", url:"https://www.similarweb.com", desc:"竞品流量分析" },
+    ]
+  },
+  {
+    name: "🤖 AI人工智能", icon: "🤖",
+    sites: [
+      { name:"ChatGPT", url:"https://chat.openai.com", desc:"OpenAI对话AI" },
+      { name:"Claude", url:"https://claude.ai", desc:"Anthropic对话AI" },
+      { name:"Gemini", url:"https://gemini.google.com", desc:"Google AI助手" },
+      { name:"Copilot", url:"https://copilot.microsoft.com", desc:"微软AI助手" },
+      { name:"Midjourney", url:"https://www.midjourney.com", desc:"AI绘画生成" },
+      { name:"Stable Diffusion", url:"https://stability.ai", desc:"开源AI绘画" },
+      { name:"Hugging Face", url:"https://huggingface.co", desc:"AI模型社区" },
+      { name:"Kimi", url:"https://kimi.moonshot.cn", desc:"月之暗面AI助手" },
+      { name:"文心一言", url:"https://yiyan.baidu.com", desc:"百度AI对话" },
+      { name:"通义千问", url:"https://tongyi.aliyun.com", desc:"阿里AI助手" },
+      { name:"讯飞星火", url:"https://xinghuo.xfyun.cn", desc:"科大讯飞AI" },
+      { name:"Perplexity", url:"https://www.perplexity.ai", desc:"AI搜索问答" },
+    ]
+  },
+  {
+    name: "🎮 游戏娱乐", icon: "🎮",
+    sites: [
+      { name:"Steam", url:"https://store.steampowered.com", desc:"PC游戏平台" },
+      { name:"Epic Games", url:"https://www.epicgames.com", desc:"Epic游戏商店" },
+      { name:"PlayStation", url:"https://www.playstation.com", desc:"索尼游戏平台" },
+      { name:"Xbox", url:"https://www.xbox.com", desc:"微软游戏平台" },
+      { name:"Nintendo", url:"https://www.nintendo.com", desc:"任天堂游戏" },
+      { name:"米游社", url:"https://www.miyoushe.com", desc:"米哈游社区" },
+      { name:"TapTap", url:"https://www.taptap.com", desc:"手游分享社区" },
+      { name:"B站游戏", url:"https://game.bilibili.com", desc:"B站游戏中心" },
+      { name:"游民星空", url:"https://www.gamersky.com", desc:"游戏资讯攻略" },
+      { name:"3DMGame", url:"https://www.3dmgame.com", desc:"单机游戏门户" },
+      { name:"Twitch", url:"https://www.twitch.tv", desc:"游戏直播平台" },
+      { name:"Discord", url:"https://discord.com", desc:"游戏社群通讯" },
+    ]
+  },
+  {
+    name: "🌙 深夜频道", icon: "🌙",
+    sites: [
+      { name:"Pornhub", url:"https://www.pornhub.com", desc:"全球最大视频分享" },
+      { name:"XVideos", url:"https://www.xvideos.com", desc:"综合视频平台" },
+      { name:"RedTube", url:"https://www.redtube.com", desc:"高清视频分享" },
+      { name:"xHamster", url:"https://xhamster.com", desc:"多元化视频社区" },
+      { name:"Chaturbate", url:"https://www.chaturbate.com", desc:"实时互动直播" },
+      { name:"LiveJasmin", url:"https://www.livejasmin.com", desc:"高端视频聊天" },
+      { name:"MyFreeCams", url:"https://www.myfreecams.com", desc:"个人直播平台" },
+      { name:"BongaCams", url:"https://bongacams.com", desc:"欧洲直播平台" },
+    ]
+  },
+  {
+    name: "📸 私房写真", icon: "📸",
+    sites: [
+      { name:"ImageFap", url:"https://www.imagefap.com", desc:"图片分享社区" },
+      { name:"Erome", url:"https://www.erome.com", desc:"私密相册分享" },
+      { name:"Fapello", url:"https://fapello.com", desc:"模特写真合集" },
+      { name:"OnlyFans", url:"https://onlyfans.com", desc:"创作者订阅平台" },
+      { name:"Fansly", url:"https://fansly.com", desc:"成人内容订阅" },
+      { name:"ManyVids", url:"https://www.manyvids.com", desc:"视频内容市场" },
+      { name:"ModelCentro", url:"https://modelcentro.com", desc:"独立创作者平台" },
+      { name:"JustForFans", url:"https://justfor.fans", desc:"粉丝订阅服务" },
+    ]
+  },
+  {
+    name: "💬 私密社交", icon: "💬",
+    sites: [
+      { name:"Kik", url:"https://www.kik.com", desc:"匿名即时通讯" },
+      { name:"Wickr", url:"https://wickr.com", desc:"端到端加密聊天" },
+      { name:"Signal", url:"https://signal.org", desc:"隐私优先通讯" },
+      { name:"Telegram X", url:"https://telegram.org", desc:"秘密聊天频道" },
+      { name:"Whisper", url:"https://whisper.sh", desc:"匿名秘密分享" },
+      { name:"Reddit NSFW", url:"https://www.reddit.com/r/nsfw", desc:"匿名社区板块" },
+    ]
+  },
+  {
+    name: "📖 成人文学", icon: "📖",
+    sites: [
+      { name:"Literotica", url:"https://www.literotica.com", desc:"英文原创故事" },
+      { name:"AO3", url:"https://archiveofourown.org", desc:"同人小说归档" },
+      { name:"Wattpad", url:"https://www.wattpad.com", desc:"在线小说社区" },
+      { name:"FictionPress", url:"https://www.fictionpress.com", desc:"原创文学平台" },
+      { name:"Stories Online", url:"https://www.storiesonline.net", desc:"长篇故事连载" },
+      { name:"Nifty", url:"https://www.nifty.org", desc:"经典故事存档" },
+    ]
+  },
+  {
+    name: "🍑 兴趣社区", icon: "🍑",
+    sites: [
+      { name:"Reddit", url:"https://www.reddit.com", desc:"全球最大论坛" },
+      { name:"4chan", url:"https://www.4chan.org", desc:"匿名讨论版" },
+      { name:"Rule34", url:"https://rule34.xxx", desc:"二次元内容聚合" },
+      { name:"Booru", url:"https://danbooru.donmai.us", desc:"图片标签搜索" },
+      { name:"Hentai Haven", url:"https://hentaihaven.xxx", desc:"动漫内容平台" },
+      { name:"NHentai", url:"https://nhentai.net", desc:"漫画资源索引" },
+      { name:"Tumblr", url:"https://www.tumblr.com", desc:"轻博客社区" },
+      { name:"Newgrounds", url:"https://www.newgrounds.com", desc:"原创内容社区" },
+    ]
+  },
+  {
+    name: "💕 缘分交友", icon: "💕",
+    sites: [
+      { name:"Tinder", url:"https://www.tinder.com", desc:"全球热门交友" },
+      { name:"Bumble", url:"https://www.bumble.com", desc:"女性主导交友" },
+      { name:"OkCupid", url:"https://www.okcupid.com", desc:"深度匹配交友" },
+      { name:"Plenty of Fish", url:"https://www.pof.com", desc:"免费约会平台" },
+      { name:"Hinge", url:"https://www.hinge.co", desc:"认真交友应用" },
+      { name:"Grindr", url:"https://www.grindr.com", desc:"LGBTQ+交友" },
+      { name:"AdultFriendFinder", url:"https://www.adultfriendfinder.com", desc:"成人社交约会" },
+      { name:"Ashley Madison", url:"https://www.ashleymadison.com", desc:"私密约会平台" },
+      { name:"Seeking", url:"https://www.seeking.com", desc:"高端社交匹配" },
+      { name:"Her", url:"https://www.her.com", desc:"女同性恋交友" },
+    ]
+  },
+  {
+    name: "🔞 限制级影音", icon: "🔞",
+    sites: [
+      { name:"YouPorn", url:"https://www.youporn.com", desc:"免费视频分享" },
+      { name:"Tube8", url:"https://www.tube8.com", desc:"高清视频平台" },
+      { name:"SpankBang", url:"https://spankbang.com", desc:"视频聚合搜索" },
+      { name:"XNXX", url:"https://www.xnxx.com", desc:"综合视频网站" },
+      { name:"PornTrex", url:"https://www.porntrex.com", desc:"高清视频库" },
+      { name:"HDZog", url:"https://hdzog.com", desc:"高清视频专区" },
+      { name:"Beeg", url:"https://beeg.com", desc:"简约视频站" },
+      { name:"Fuq", url:"https://www.fuq.com", desc:"视频搜索引擎" },
+    ]
+  },
+  {
+    name: "🎭 成人漫画", icon: "🎭",
+    sites: [
+      { name:"Comixology", url:"https://www.comixology.com", desc:"数字漫画平台" },
+      { name:"MangaDex", url:"https://mangadex.org", desc:"多语种漫画" },
+      { name:"Fakku", url:"https://www.fakku.net", desc:"正版成人漫画" },
+      { name:"HentaiFox", url:"https://hentaifox.com", desc:"漫画资源站" },
+      { name:"Tsumino", url:"https://www.tsumino.com", desc:"在线漫画阅读" },
+      { name:"nHentai Mirror", url:"https://hentai.nu", desc:"漫画镜像站" },
+    ]
+  },
+  {
+    name: "📱 直播与凸轮", icon: "📱",
+    sites: [
+      { name:"Stripchat", url:"https://stripchat.com", desc:"免费直播平台" },
+      { name:"Camsoda", url:"https://www.camsoda.com", desc:"互动直播社区" },
+      { name:"Flirt4Free", url:"https://www.flirt4free.com", desc:"高端视频聊天" },
+      { name:"Cam4", url:"https://www.cam4.com", desc:"全球直播平台" },
+      { name:"ImLive", url:"https://www.imlive.com", desc:"老牌直播站" },
+      { name:"SkyPrivate", url:"https://www.skyprivate.com", desc:"私密视频通话" },
+    ]
+  },
+  {
+    name: "🏪 成人电商", icon: "🏪",
+    sites: [
+      { name:"Adam & Eve", url:"https://www.adameve.com", desc:"成人用品商城" },
+      { name:"Lovehoney", url:"https://www.lovehoney.com", desc:"情趣用品电商" },
+      { name:"PinkCherry", url:"https://www.pinkcherry.com", desc:"情趣用品专卖" },
+      { name:"Spencer's", url:"https://www.spencersonline.com", desc:"派对用品商店" },
+      { name:"OnlyFans Marketplace", url:"https://onlyfans.com", desc:"创作者周边商店" },
+      { name:"Etsy Adult", url:"https://www.etsy.com", desc:"手工成人艺术品" },
+    ]
+  },
+  {
+    name: "🔐 隐私与安全", icon: "🔐",
+    sites: [
+      { name:"Tor Project", url:"https://www.torproject.org", desc:"匿名网络浏览器" },
+      { name:"ProtonMail", url:"https://proton.me", desc:"加密匿名邮箱" },
+      { name:"NordVPN", url:"https://nordvpn.com", desc:"虚拟专用网络" },
+      { name:"ExpressVPN", url:"https://www.expressvpn.com", desc:"高速VPN服务" },
+      { name:"Surfshark", url:"https://surfshark.com", desc:"性价比VPN" },
+      { name:"Mullvad", url:"https://mullvad.net", desc:"隐私优先VPN" },
+      { name:"Brave Browser", url:"https://brave.com", desc:"隐私浏览器" },
+      { name:"DuckDuckGo Privacy", url:"https://duckduckgo.com/app", desc:"隐私保护浏览器" },
+    ]
+  },
+  {
+    name: "📺 海外影视", icon: "📺",
+    sites: [
+      { name:"HBO Max", url:"https://www.max.com", desc:"HBO流媒体" },
+      { name:"Hulu", url:"https://www.hulu.com", desc:"美国流媒体" },
+      { name:"Apple TV+", url:"https://tv.apple.com", desc:"苹果原创影视" },
+      { name:"Amazon Prime", url:"https://www.primevideo.com", desc:"亚马逊影视" },
+      { name:"Peacock", url:"https://www.peacocktv.com", desc:"NBC环球流媒体" },
+      { name:"Paramount+", url:"https://www.paramountplus.com", desc:"派拉蒙流媒体" },
+      { name:"Crunchyroll", url:"https://www.crunchyroll.com", desc:"日本动漫流媒体" },
+      { name:"Funimation", url:"https://www.funimation.com", desc:"动漫英语配音" },
+    ]
+  },
+  {
+    name: "🎲 赌博与博彩", icon: "🎲",
+    sites: [
+      { name:"Bet365", url:"https://www.bet365.com", desc:"全球最大博彩" },
+      { name:"William Hill", url:"https://www.williamhill.com", desc:"英国老牌博彩" },
+      { name:"PokerStars", url:"https://www.pokerstars.com", desc:"在线扑克平台" },
+      { name:"888 Casino", url:"https://www.888casino.com", desc:"在线赌场" },
+      { name:"LeoVegas", url:"https://www.leovegas.com", desc:"移动博彩平台" },
+      { name:"DraftKings", url:"https://www.draftkings.com", desc:"体育博彩" },
+      { name:"FanDuel", url:"https://www.fanduel.com", desc:" fantasy 体育" },
+      { name:"Stake", url:"https://stake.com", desc:"加密货币博彩" },
+    ]
+  },
+  {
+    name: "💊 灰色市场", icon: "💊",
+    sites: [
+      { name:"Cheap Meds", url:"https://www.healthylife.com", desc:"海外药品代购" },
+      { name:"International Pharmacy", url:"https://www.pharmacychecker.com", desc:"国际药房比价" },
+      { name:"Coinbase", url:"https://www.coinbase.com", desc:"加密货币交易所" },
+      { name:"Kraken", url:"https://www.kraken.com", desc:"老牌加密货币" },
+      { name:"LocalBitcoins", url:"https://localbitcoins.com", desc:"P2P比特币交易" },
+      { name:"Darknet Live", url:"https://darknetlive.com", desc:"暗网市场资讯" },
+    ]
+  },
+];
+
+/* ========== 渲染分类导航条 ========== */
+const navContainer = document.getElementById('categoryNav');
+categories.forEach((cat, idx) => {
+  const a = document.createElement('a');
+  a.href = `#cat-${idx}`;
+  a.textContent = cat.name;
+  navContainer.appendChild(a);
+});
+
+/* ========== 渲染主内容 ========== */
+const mainContainer = document.getElementById('mainContent');
+categories.forEach((cat, idx) => {
+  const section = document.createElement('div');
+  section.className = 'category-section';
+  section.id = `cat-${idx}`;
+
+  const header = document.createElement('div');
+  header.className = 'category-header';
+  header.innerHTML = `<h2>${cat.name}</h2><span class="toggle-icon">▼</span>`;
+  header.onclick = () => section.classList.toggle('collapsed');
+
+  const grid = document.createElement('div');
+  grid.className = 'nav-grid';
+
+  cat.sites.forEach(site => {
+    const card = document.createElement('a');
+    card.className = 'nav-card';
+    card.href = site.url;
+    card.target = '_blank';
+    card.rel = 'noopener noreferrer';
+    card.innerHTML = `
+      <span class="card-icon">${cat.icon}</span>
+      <div class="card-title">${site.name}</div>
+      <div class="card-desc">${site.desc}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  section.appendChild(header);
+  section.appendChild(grid);
+  mainContainer.appendChild(section);
+});
+
+/* ========== 搜索功能 ========== */
+const engines = {
+  baidu:  (q) => `https://www.baidu.com/s?wd=${encodeURIComponent(q)}`,
+  google: (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`,
+  bing:   (q) => `https://www.bing.com/search?q=${encodeURIComponent(q)}`,
+  duckduckgo: (q) => `https://duckduckgo.com/?q=${encodeURIComponent(q)}`,
+  github: (q) => `https://github.com/search?q=${encodeURIComponent(q)}`,
+  zhihu:  (q) => `https://www.zhihu.com/search?q=${encodeURIComponent(q)}`,
+};
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { showToast('⚠️ 请输入搜索内容'); return; }
+  const eng = document.getElementById('searchEngine').value;
+  window.open(engines[eng](q), '_blank');
+}
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+/* ========== 时钟 ========== */
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('zh-CN', { hour12:false });
+  const date = now.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', weekday:'short' });
+  document.getElementById('clock').textContent = `🕐 ${time}`;
+  document.getElementById('date').textContent = `📅 ${date}`;
+}
+updateClock(); setInterval(updateClock, 1000);
+
+/* ========== 快捷操作 ========== */
+function addBookmark() {
+  showToast('⭐ 请按 ' + (navigator.userAgent.match(/Mac/) ? '⌘+D' : 'Ctrl+D') + ' 收藏此页');
+}
+function setHomepage() {
+  showToast('🏠 请在浏览器设置中将此页设为主页');
+}
+function clearData() {
+  if (confirm('确定要清除所有本地数据吗？')) {
+    localStorage.clear();
+    sessionStorage.clear();
+    showToast('✅ 数据已清除');
+  }
+}
+
+/* ========== Toast提示 ========== */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ========== 返回顶部 ========== */
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  btn.classList.toggle('show', window.scrollY > 400);
+});
+
+/* ========== 键盘快捷键 ========== */
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') document.getElementById('searchInput').blur();
+});
+</script>
+</body>
+</html>
